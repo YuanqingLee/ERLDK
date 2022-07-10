@@ -1,7 +1,7 @@
 # ERLDK
 multimodal emotion recognition model for conversational videos based on reinforcement learning and domain knowledge
 
-This is the open access code for the paper: Real-Time Video Emotion Recognition based on Reinforcement Learning and Domain Knowledge, which has been published online on April 12, 2021. This paper can be download from https://ieeexplore.ieee.org/document/9400391.
+This is the open access code for the paper: Real-Time Video Emotion Recognition based on Reinforcement Learning and Domain Knowledge, which has been published online on April 12, 2021. This paper can be downloaded from https://ieeexplore.ieee.org/document/9400391.
 
 Here's the abstract.
 
