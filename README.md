@@ -9,9 +9,23 @@ Multimodal emotion recognition in conversational videos (ERC) develops rapidly i
 
 How to use this repository:
 
-read.py:
-dataloader.py:
-knowledge.py:
-dqn_env_iemocap.py:
-dqn_env_meld.py:
-dialogue_level_test.py:
+#read.py:
+pre-process the original iemocap database to become the new database which can be used to extract the emotion domain knowledge. In this current file, the window size is set as 3.
+
+#dataloader_1.py:
+load the original iemocap raw database.
+
+#knowledge.py:
+use the new database from the read.py to extract the domain knowledge. In this current file, the window size is set as 5.
+
+#dqn_env_iemocap.py:
+the train file
+
+#dialogue_level_test.py:
+the dialogue level test file
+
+#pair_datalodoader.py:
+load the data from the new database from the read.py
+
+#dueling_dqn_model.py:
+establish the ddqn model.
