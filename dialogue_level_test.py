@@ -21,13 +21,12 @@ from tqdm import tqdm
 from collections import namedtuple, deque
 import random
 
-from dueling_dqn_model import DQN, Dueling_DQN, DuelingDQN, DuelingDQN_test, DuelingDQN_GRU, DuelingDQN_test_GRU, DuelingDQN_GRU_nomal, DuelingDQN_GRU_nomal_light, DuelingDQN_GRU_nomal_four, DuelingDQN_GRU_nomal_revise, DuelingDQN_GRU_revise, DuelingDQN_GRU_nomal_avt, DuelingDQN_GRU_nomal_try
+from dueling_dqn_model import DuelingDQN
 
 from sklearn.metrics import f1_score, confusion_matrix, accuracy_score,\
                         classification_report, precision_recall_fscore_support, recall_score, precision_score
 
 from dataloader_1 import IEMOCAPDataset, MELDDataset
-from unimodel import uniaudiomodalpairs
 from pair_datalodoader import IEMOCAP_pair_Dataset
 
 OptimizerSpec = namedtuple("OptimizerSpec", ["constructor", "kwargs"])
@@ -140,7 +139,7 @@ if __name__ == '__main__':
     cuda = 0
     device = torch.device("cuda:%d" % cuda if torch.cuda.is_available() else "cpu")
 
-    testset_iemocap = IEMOCAPDataset(path='G:\\ins2\\AEPR\\IEMOCAP_features\\IEMOCAP_features_raw.pkl', train = False)
+    testset_iemocap = IEMOCAPDataset(path='...\\IEMOCAP_features_raw.pkl', train = False)
 
     Q = DuelingDQN(learning_rate = LEARNING_RATE,batch_size = batch)
 
@@ -154,14 +153,14 @@ if __name__ == '__main__':
     )
     optimizer = optimizer.constructor(Q.parameters(), **optimizer.kwargs)
 
-    dir_path = "%s%d" % ('G:\\ins2\\AEPR', -1)
+    dir_path = "%s%d" % ('...', -1)
     if not os.path.exists(dir_path):
         os.mkdir(dir_path)
     log_file = "%s/print.log" % dir_path
     f = open(log_file, "w+")
     sys.stdout = f
 
-    domain = pd.read_pickle('G:\ins2\\AEPR\\knowdge_pair_iemocap.pkl')
+    domain = pd.read_pickle('...\\knowdge_pair_iemocap.pkl')
     title = domain.pair_Labels
     p = domain.P
     
