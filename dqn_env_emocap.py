@@ -16,7 +16,7 @@ from tqdm import tqdm
 from collections import namedtuple, deque
 import random
 
-from dueling_dqn_model import DQN, Dueling_DQN, DuelingDQN, DuelingDQN_test, DuelingDQN_GRU, DuelingDQN_test_GRU, DuelingDQN_GRU_nomal, DuelingDQN_GRU_nomal_light, DuelingDQN_GRU_nomal_four, DuelingDQN_GRU_nomal_revise, DuelingDQN_GRU_revise, DuelingDQN_GRU_nomal_avt, DuelingDQN_GRU_nomal_try
+from dueling_dqn_model import DuelingDQN
 
 from sklearn.metrics import f1_score, confusion_matrix, accuracy_score,\
                         classification_report, precision_recall_fscore_support, recall_score, precision_score
@@ -181,44 +181,12 @@ if __name__ == '__main__':
             pair_Labels, states_f_text, states_f_audio, states_f_visual, next_states_f_text, next_states_f_audio, next_states_f_visual, action, done = pair_Labels.to(
                 device), states_f_text.to(device), states_f_audio.to(device), states_f_visual.to(device), next_states_f_text.to(device), next_states_f_audio.to(
                     device), next_states_f_visual.to(device), action.to(device), done.to(device)
-
-            ####################### without exploration
+            
             Q.train()
-            q_values = Q(states_f_text,states_f_audio,states_f_visual)
-            q_action = torch.argmax(q_values, dim = 1) # for dqn
-            # q_action = F.log_softmax(q_values, dim = 1) # for nomal without dqn
-            # q_action_t = F.softmax(q_values, dim = 1) # for nomal without dqn
-            # q_action = torch.argmax(q_action, dim = 1) # for nomal without dqn
-            q_action = F.log_softmax(q_values, dim = 1) # for 4-pair nomal without dqn
-            q_action_t = F.softmax(q_values, dim = 1) # for 4-pair nomal without dqn
-            q_action = torch.argmax(q_action, dim = 1) # for 4-pair nomal without dqn
-            pair_Labels_g = torch.squeeze(pair_Labels) # for 4-pair nomal without dqn
-            pair_Labels_g = pair_Labels_g.data.contiguous().view(-1) # for 4-pair nomal without dqn
+            ####################### without exploration
+            # q_values = Q(states_f_text,states_f_audio,states_f_visual)
+            # q_action = torch.argmax(q_values, dim = 1) # for dqn
             # ####################### without exploration
-
-            ######################################################################nomal no dqn
-            ############################# backwards pass
-            # action_g = torch.squeeze(action) # for nomal without dqn
-            optimizer.zero_grad()
-            # loss = criterion(q_values, action_g) # for nomal without dqn
-            loss = criterion(q_values, pair_Labels_g) # for 4-pair nomal without dqn
-            loss.backward()
-            # print(loss)
-
-            ############################ for nomal without dqn
-            # for j in range(batch_tem):
-            #     if q_action[j] == action[j]:
-            #         tot_right +=1
-            # tot_num += batch_tem
-            ############################ for nomal without dqn
-
-            ############################ for 4-pair nomal without dqn
-            for j in range(batch_tem*4):
-                if q_action[j] == pair_Labels_g[j]:
-                    tot_right +=1
-            tot_num += batch_tem*4
-            ############################ for 4-pair nomal without dqn
-            ######################################################################nomal no dqn
 
             #######################exploration
             sample = random.random()
@@ -312,8 +280,8 @@ if __name__ == '__main__':
             num_param_updates += 1
 
             # update target Q network weights with current Q network weights
-            # if num_param_updates % target_update_freq == 0:
-            #     Q_target.load_state_dict(Q.state_dict())
+            if num_param_updates % target_update_freq == 0:
+                Q_target.load_state_dict(Q.state_dict())
         
         print("now the epoch number is: %d" % epoch)
         tot_num_t = 0.0
@@ -373,18 +341,15 @@ if __name__ == '__main__':
                 
                 Q.eval()
                 q_values = Q(states_f_text,states_f_audio,states_f_visual)
-                # q_action = torch.argmax(q_values, dim = 1) # for dqn
-                # q_action = F.log_softmax(q_values, dim = 1) # for nomal without dqn
-                # q_action = torch.argmax(q_action, dim = 1) # for nomal without dqn
-                q_action = F.log_softmax(q_values, dim = 1) # for 4-pair nomal without dqn
-                q_action_t = F.softmax(q_values, dim = 1)# for 4-pair nomal without dqn
-                q_action = torch.argmax(q_action, dim = 1) # for 4-pair nomal without dqn
+                q_action = torch.argmax(q_values, dim = 1) # for dqn
 
-                pair_Labels = torch.squeeze(pair_Labels) # for both without dqn
-                pair_Labels_g = pair_Labels_g.data.contiguous().view(-1) # for 4-pair nomal without dqn
-                q_values = q_values.data.contiguous().view(batch_tem, 4, -1) # for 4-pair nomal without dqn
-                q_action_t = q_action_t.data.contiguous().view(batch_tem, 4, -1) # for 4-pair nomal without dqn
-                q_action = q_action.data.contiguous().view(batch_tem, -1) # for 4-pair nomal without dqn
+                q_action_t = F.softmax(q_values, dim = 1)
+
+                pair_Labels = torch.squeeze(pair_Labels) 
+                pair_Labels_g = pair_Labels_g.data.contiguous().view(-1) 
+                q_values = q_values.data.contiguous().view(batch_tem, 4, -1) 
+                q_action_t = q_action_t.data.contiguous().view(batch_tem, 4, -1)
+                q_action = q_action.data.contiguous().view(batch_tem, -1) 
 
                 action = action.squeeze()
                 action_r.extend(action)
@@ -395,12 +360,10 @@ if __name__ == '__main__':
                     tem = q_values[j]
                     Y_valid.append(action[j])
 
-                    ################################### for 4-pair nomal without dqn
                     tem_pair = q_action[j]
                     t_0 = tem_pair[0].tolist()
                     t_1 = tem_pair[1].tolist()
                     t_2 = tem_pair[2].tolist()
-                    ################################### for 4-pair nomal without dqn
 
                     tem_pair_real = pair_Labels[j]
                     t_0_real = tem_pair_real[0].tolist()
@@ -420,12 +383,11 @@ if __name__ == '__main__':
                     t_max_real = torch.argmax(t_max_real, dim = 0)
                     try_tot_real.append(t_max_real)
                     tem_t = q_action_t[j]
-                    # t_revise_real = tem_t + 1.5*t_t_real # for nomal without dqn
-                    t_revise_real = tem_t[3] + 1.5*t_t_real # for 4-pair nomal without dqn
+
+                    t_revise_real = tem_t[3] + t_t_real
                     t_revise_real = torch.argmax(t_revise_real, dim = 0)
                     try_tot_revise_real.append(t_revise_real)
 
-                    ################################### for 4-pair nomal without dqn
                     t = str(t_0)+str(t_1)+str(t_2)
                     if t in title:
                         t_t = p[t]
@@ -442,7 +404,6 @@ if __name__ == '__main__':
                     t_revise = tem_t[3] * t_t
                     t_revise = torch.argmax(t_revise, dim = 0)
                     try_tot_revise.append(t_revise)
-                    ################################### for 4-pair nomal without dqn
 
             for k in range(len(action_r)):
                 if try_tot_revise_real[k] == 0:
@@ -474,8 +435,7 @@ if __name__ == '__main__':
         
             for j in range(len(action_r)):
                 tem_pair = try_tot_revise_real[j]
-                if tem_pair == action_r[j]: # for 4-pair nomal without dqn
-                # if tem_pair == action[j]: # for nomal without dqn
+                if tem_pair == action_r[j]: 
                     tot_right_t +=1
                     if action_r[j] == 0:
                         tot_0_r += 1
@@ -538,18 +498,18 @@ if __name__ == '__main__':
 
             Y_valid = torch.tensor(Y_valid)
             Y_valid = torch.squeeze(Y_valid)
-            try_tot = torch.tensor(try_tot) # for 4-pair nomal without dqn
-            tot_right_try += torch.sum(torch.eq(Y_valid, try_tot))# recognition library # for 4-pair nomal without dqn
-            try_tot_revise = torch.tensor(try_tot_revise) # for 4-pair nomal without dqn
-            tot_right_try_revise += torch.sum(torch.eq(Y_valid, try_tot_revise)) #recognition pair # for 4-pair nomal without dqn
+            try_tot = torch.tensor(try_tot) 
+            tot_right_try += torch.sum(torch.eq(Y_valid, try_tot))# recognition library 
+            try_tot_revise = torch.tensor(try_tot_revise) 
+            tot_right_try_revise += torch.sum(torch.eq(Y_valid, try_tot_revise)) #recognition pair 
             try_tot_revise_real = torch.tensor(try_tot_revise_real)
             tot_right_revise_real += torch.sum(torch.eq(Y_valid, try_tot_revise_real)) #real pair
             try_tot_real = torch.tensor(try_tot_real)
             tot_right_revise_max_real += torch.sum(torch.eq(Y_valid, try_tot_real)) #library
 
             acc_r_t = tot_right_t/tot_num_t # own
-            acc_try = tot_right_try/tot_num_t # recognition library max # for 4-pair nomal without dqn
-            acc_try_revise = tot_right_try_revise/tot_num_t #recognition pair # for 4-pair nomal without dqn
+            acc_try = tot_right_try/tot_num_t # recognition library max 
+            acc_try_revise = tot_right_try_revise/tot_num_t #recognition pair
 
             acc_real = tot_right_revise_real/tot_num_t
             acc_real_max = tot_right_revise_max_real/tot_num_t
@@ -563,7 +523,5 @@ if __name__ == '__main__':
         acc = tot_right/tot_num
         print('train [%d, %5d] acc: %.3f' % (epoch + 1, i + 1, (tot_right/tot_num)))
     
-    # torch.save(Q.state_dict(), 'Q.pkl')
+    torch.save(Q.state_dict(), 'Q.pkl')
     ##############################end train#####################################################
-    
-   
