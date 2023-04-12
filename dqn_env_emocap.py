@@ -148,14 +148,14 @@ if __name__ == '__main__':
     optimizer = optimizer.constructor(Q.parameters(), **optimizer.kwargs)
 
     ##############################begin train#####################################################
-    pair_env_train = IEMOCAP_pair_Dataset(path='...\\trainset_pair_new_justtrain_4.pkl')
+    pair_env_train = IEMOCAP_pair_Dataset(path='...\\trainset_pair.pkl')
     train_loader = DataLoader(
                                 dataset=pair_env_train,
                                 batch_size=batch,
                                 shuffle=True,
                                 num_workers=0,
     )
-    pair_env_test = IEMOCAP_pair_Dataset(path='...\\testset_pair_new_justtest_4.pkl')
+    pair_env_test = IEMOCAP_pair_Dataset(path='...\\testset_pair.pkl')
     test_loader = DataLoader(
                                 dataset=pair_env_test,
                                 batch_size=10,
